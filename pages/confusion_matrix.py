@@ -12,9 +12,11 @@ tags = ['aid', 'american','army', 'hunger','war' ,'buildings', 'work', 'camp', '
 
 def app() -> None:
     st.title("Confusion Matrix")
-    display_matrix()
+    matrix = display_matrix()
+    st.plotly_chart(matrix,use_container_width=True)
 
-def display_matrix() -> None:
+@st.cache(allow_output_mutation = True)
+def display_matrix():
 
     PREDICTION_SAMPLES = 100
     true_values = []
@@ -36,11 +38,13 @@ def display_matrix() -> None:
         file.close()
 
     matrix = confusion_matrix(true_values,prediction_values,labels = tags)
-    create_heat_map(matrix)
+    figure = create_heat_map(matrix)
+    return figure
+    
 
 
 
-def create_heat_map(matrix) -> None:
+def create_heat_map(matrix):
 
     
     anotated_matrix= matrix.tolist()
@@ -50,11 +54,6 @@ def create_heat_map(matrix) -> None:
     fig = ff.create_annotated_heatmap(anotated_matrix, x=tags, y=tags, 
     annotation_text=matrix_text, colorscale='Viridis')
 
-    # add title
-    # fig.update_layout(title_text='<i><b>                                                                                          Confusion Matrix</b></i>',
-    #               #xaxis = dict(title='x'),
-    #               #yaxis = dict(title='x')
-    #              )
 
     # add custom xaxis title
     fig.add_annotation(dict(font=dict(color="white",size=14),
@@ -80,7 +79,7 @@ def create_heat_map(matrix) -> None:
 
     # add colorbar
     fig['data'][0]['showscale'] = True
-    st.plotly_chart(fig,use_container_width=True)
+    return fig
     #fig.show()
 
     print("DONE CREATING CONFUSION MATRIX")
