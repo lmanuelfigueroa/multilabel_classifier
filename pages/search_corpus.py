@@ -30,9 +30,9 @@ def load_model(tag, percentage) -> None:
     
     nlp = English()
 
-    path = "single_test_reading/*.txt"
-    #path = "testing_multiple_corpus_reading/*.txt"
-    #paht = "new_ocr"
+    #path = "single_test_reading/*.txt"
+    path = "testing_multilabel_corpus_reading/*.txt"
+    #path = "new_ocr/*.txt"
     files = glob.glob(str(path))
     rn_numbers = []
     result_tags = []
@@ -49,7 +49,7 @@ def load_model(tag, percentage) -> None:
         with open(file, "r",encoding= "utf-8") as f:
             data = f.read()
             top_3_labels = process_document(nlp,data,percentage)
-            st.write(top_3_labels)
+            #st.write(top_3_labels)
             print(top_3_labels)
             if top_3_labels[0][0] == tag:
                 rn_numbers.append(transcript)
