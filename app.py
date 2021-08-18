@@ -5,7 +5,16 @@ from pages import confusion_matrix,search_corpus,upload_corpus,home
 
 app = MultiApp()
 st.title("USHMM Oral Testimony MultiLabel Classifier")
-st.write("View Items")
+"""
+### Features on App
+
+- Search Corpus
+    - Displays the documents that have high percentages of the topic of interest.
+- Upload Corpus
+    - Upload your own files and page will display the percentages of topics found in each document.
+- Confusion Matrix
+    - Displays the accuracy of the model used on 50 text samples in a Confusion Matrix.
+"""
 
 
 # Add all your application here

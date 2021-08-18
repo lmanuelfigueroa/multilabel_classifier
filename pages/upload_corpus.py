@@ -1,60 +1,30 @@
 import streamlit as st
+from spacy.lang.en import English
+import operator
+import spacy
+from io import StringIO
 
+
+tags = ['aid', 'american','army', 'hunger','war' ,'buildings', 'work', 'camp', 'family', 'fear', 'food', 
+'ghetto','relocation' ,'government', 'hiding','sick','hospital', 'shooting', 'kill','Nazi', 'police', 'prisoners','school', 'religion', 'Jewish', 
+ 'polish','russian', 'survive', 'synagogue']
 
 def app() -> None:
     st.title("Upload Corpus")
-    pass
 
+    upload_files = st.file_uploader("Enter a file:",accept_multiple_files=True)
 
-def app() -> None:
-    st.title("Search Corpus")
-    main = st.form("current")
-    selected_tag = main.selectbox("Select Tag to Search Documents",screen_tags)
-    percentage = main.number_input("Enter a percentage: ex: 50",min_value = 0, max_value = 100, value = 50)
-    submit_button = main.form_submit_button("Submit")
-    if submit_button:
-        load_model(selected_tag,percentage)
-
-
-
-def load_model(tag, percentage) -> None:
-    
-    nlp = English()
-
-    #path = "single_test_reading/*.txt"
-    path = "testing_multilabel_corpus_reading/*.txt"
-    #path = "new_ocr/*.txt"
-    files = glob.glob(str(path))
-    rn_numbers = []
-    result_tags = []
-
-    for file in files:
-        reference = file.split("\\")[1].replace(".txt","")
-        rg_num = reference.split("_")[0]
-        reference = reference +".pdf#page6"
-        url = f"https://collections.ushmm.org/oh_findingaids/{reference}"
-        transcript = f'<a target="_blank" onclick="find({rg_num});" href="{url}">{rg_num}</a>' 
-
+    if upload_files is not None:
+        for file in upload_files:
+            stringio = StringIO(file.getvalue().decode("utf-8"))
+            string_data = stringio.read()
+            process_document(string_data,file.name)
+            #st.write(string_data)
         
-        with open(file, "r",encoding= "utf-8") as f:
-            data = f.read()
-            top_3_labels = process_document(nlp,data,percentage)
-            #st.write(top_3_labels)
-            #print(top_3_labels)
-            if top_3_labels[0][0] == tag or top_3_labels[1][0] == tag or top_3_labels[2][0] == tag:
-                print(top_3_labels)
-                rn_numbers.append(transcript)
-                result_tags.append(top_3_labels)
+def process_document(document,file_name) -> None:
 
-    
-    table_data = pd.DataFrame({'Testimony':rn_numbers,'Top Tags':result_tags})
-    table_data = table_data.to_html(escape = False)
-    st.write(table_data,unsafe_allow_html = True)
-
-
-def process_document(nlp,data,percentage) -> list:
-
-    PERCENTAGE_CONSIDER_TAG = percentage/100
+    nlp = English()
+    PERCENTAGE_CONSIDER_TAG = 0
     label_dict = dict.fromkeys(tags,0)
     nlp_labels = spacy.load("model_output_exclusive/model-last")
     
@@ -63,7 +33,7 @@ def process_document(nlp,data,percentage) -> list:
 
     nlp.max_length = 174214790
     nlp.add_pipe('sentencizer')
-    doc = nlp(data, disable=['parser', 'tagger', 'ner'])
+    doc = nlp(document, disable=['parser', 'tagger', 'ner'])
 
     num_of_sentences = len(list(doc.sents))
 
@@ -77,30 +47,19 @@ def process_document(nlp,data,percentage) -> list:
             num_of_tags_found +=1
             label_dict[first_tag] = label_dict[first_tag] + 1
                 
-    st.write(f"The documents contains {num_of_sentences} sentences and {num_of_tags_found} tags were assigned on {round(PERCENTAGE_CONSIDER_TAG*100)}% tag requirement\n")
-
+    #st.write(f"Document {file_name} contains {num_of_sentences} sentences and {num_of_tags_found} tags were assigned on {round(PERCENTAGE_CONSIDER_TAG*100,1)}% tag requirement\n")
+    st.write(f"Document {file_name} contains {num_of_sentences} sentences and {num_of_tags_found} tags were assigned")
+    
     #getting the percentage of tags for the document
     for tag in label_dict:
-        label_dict[tag] = round(label_dict[tag]*100/num_of_tags_found)
+        label_dict[tag] = round(label_dict[tag]*100/num_of_tags_found,1)
 
+    print_top_tags(label_dict)
 
-    sorted_d = dict( sorted(label_dict.items(), key=operator.itemgetter(1),reverse=True))
-    dict_pairs = sorted_d.items()
-    pair_iter =  iter(dict_pairs)
-
-    top_tags = []
-
-    NUM_TOP_TAGS = 3
-    
-    for i in range(NUM_TOP_TAGS):
-        pair = next(pair_iter)
-        top_tags.append(pair)
-    
-    return top_tags
 
 def print_top_tags(tags: dict) -> None:
 
-    NUMB_OF_TAGS = 3
+    NUMB_OF_TAGS = 5
     sorted_d = dict( sorted(tags.items(), key=operator.itemgetter(1),reverse=True))
     dict_pairs = sorted_d.items()
     pair_iter =  iter(dict_pairs)
@@ -110,9 +69,8 @@ def print_top_tags(tags: dict) -> None:
     for i in range(NUMB_OF_TAGS):
         pair = next(pair_iter)
         top_tags.append(pair)
-    
-    st.write("\n")
-    st.write(f"The top 3 most common tags in the document are {top_tags}")
+
+    st.write(f"The top { NUMB_OF_TAGS} tags in the document are {top_tags}\n")
 
 
 def top_tag(tags : dict) -> str:

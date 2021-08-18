@@ -1,24 +1,18 @@
 import streamlit as st
-from spacy.lang.en import English
-import operator
 from csv import reader
 import pandas as pd
 import ast
 
-tags = ['aid', 'american', 'army', 'buildings', 'camp', 'family', 'fear', 'food', 
-'ghetto', 'government', 'hiding', 'hospital', 'hunger', 'Jewish', 'kill','Nazi', 'police', 'polish', 'prisoners', 'religion', 
-'relocation', 'russian', 'school', 'shooting', 'sick', 'survive', 'synagogue', 'war', 'work']
-
-
-screen_tags = ['','aid', 'american','army', 'hunger','war' ,'buildings', 'work', 'camp', 'family', 'fear', 'food', 
-'ghetto','relocation' ,'government', 'hiding','sick','hospital', 'shooting', 'kill','Nazi', 'police', 'prisoners','school', 'religion', 'Jewish', 
- 'polish','russian', 'survive', 'synagogue']
+screen_tags = ['','aid', 'american','army', 'buildings', 'camp', 'family', 'fear', 'food', 
+'ghetto','government', 'hiding','hospital', 'hunger',  'Jewish', 'kill','Nazi', 'police','polish', 'prisoners',  
+ 'religion','relocation','russian', 'school','shooting','sick','survive', 'synagogue','war','work']
 
 def app() -> None:
     st.title("Search Corpus")
     main = st.form("current")
     selected_tag = main.selectbox("Select Tag to Search Documents",screen_tags)
-    top_number = main.number_input("Enter a number: ",min_value = 1, max_value = 10, value = 3)
+    top_number = main.number_input("What position would you like your topic to be in results: "
+    "Example: 3, Results will display documents where tag is in the top 3 percentages ",min_value = 1, max_value = 29, value = 3)
     submit_button = main.form_submit_button("Submit")
     if submit_button:
         read_model_results(selected_tag,top_number)
@@ -45,13 +39,6 @@ def read_model_results(tag, top_number) -> None:
     results = []
     rg_links = []
 
-
-    # reference = file.split("\\")[1].replace(".txt","")
-    # rg_num = reference.split("_")[0]
-    # reference = reference +".pdf#page6"
-    # url = f"https://collections.ushmm.org/oh_findingaids/{reference}"
-    # transcript = f'<a target="_blank" onclick="find({rg_num});" href="{url}">{rg_num}</a>' 
-
     #iterating through the list and searching for the documents where the tap is in the top n tag percentages
     for doc in reduced_tag_percentages:
 
@@ -65,7 +52,7 @@ def read_model_results(tag, top_number) -> None:
             if doc[1][i][0] == tag:
                 rg_links.append(link)
                 results.append(doc[1])
-                
+    st.write(f"{len(results)} documents found with the tag \"{tag.capitalize()}\" in the top {top_number} percentages")
     table_data = pd.DataFrame({'Testimony':rg_links,'Top Tags':results})
     table_data = table_data.to_html(escape = False)
     st.write(table_data,unsafe_allow_html = True)
