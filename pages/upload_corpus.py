@@ -19,8 +19,10 @@ def app() -> None:
             stringio = StringIO(file.getvalue().decode("utf-8"))
             string_data = stringio.read()
             process_document(string_data,file.name)
-            #st.write(string_data)
+        st.write(f"Done Processing Documents")
         
+
+#processing each file uploaded 
 def process_document(document,file_name) -> None:
 
     nlp = English()
@@ -38,17 +40,23 @@ def process_document(document,file_name) -> None:
     num_of_sentences = len(list(doc.sents))
 
     num_of_tags_found = 0
+    st.write(f"Loading Results for {file_name}\n")
+
+    #processing each sentence and getting the tag for each sentence with the highest percentage
     for sent in doc.sents:
         text = remove_accents(str(sent.text))
         doc = nlp_labels(text)
     
         first_tag = top_tag(doc.cats)
+
+        #creating a threshold to count how many sentences have a valuable tag associated
         if doc.cats[first_tag] > PERCENTAGE_CONSIDER_TAG:
             num_of_tags_found +=1
             label_dict[first_tag] = label_dict[first_tag] + 1
-                
+    
+    
     #st.write(f"Document {file_name} contains {num_of_sentences} sentences and {num_of_tags_found} tags were assigned on {round(PERCENTAGE_CONSIDER_TAG*100,1)}% tag requirement\n")
-    st.write(f"Document {file_name} contains {num_of_sentences} sentences and {num_of_tags_found} tags were assigned")
+    st.write(f"Document contains {num_of_sentences} sentences and {num_of_tags_found} tags were assigned")
     
     #getting the percentage of tags for the document
     for tag in label_dict:
@@ -57,6 +65,7 @@ def process_document(document,file_name) -> None:
     print_top_tags(label_dict)
 
 
+#function sorts the tags with highest on the front and prints the top 5 tags in the dictionary 
 def print_top_tags(tags: dict) -> None:
 
     NUMB_OF_TAGS = 5
@@ -66,13 +75,24 @@ def print_top_tags(tags: dict) -> None:
 
     top_tags = []
     
-    for i in range(NUMB_OF_TAGS):
+    for _ in range(NUMB_OF_TAGS):
         pair = next(pair_iter)
         top_tags.append(pair)
 
-    st.write(f"The top { NUMB_OF_TAGS} tags in the document are {top_tags}\n")
 
+    clean_tags = clean_results(top_tags)
+    st.write(f"The top { NUMB_OF_TAGS} tags in the document are {clean_tags}\n")
 
+# used to print the results more visually pleasing for user by capitalizing the name of the tag and adding percent sign to float value
+def clean_results(results):
+
+    clean_results = []
+    
+    for item in results:
+        clean_results.append((item[0].capitalize(),str(item[1]) + "%" ))
+    return clean_results
+
+#gets the tag with the highest percent value
 def top_tag(tags : dict) -> str:
     sorted_d = dict( sorted(tags.items(), key=operator.itemgetter(1),reverse=True))
     dict_pairs = sorted_d.items()

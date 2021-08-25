@@ -18,6 +18,7 @@ st.title("USHMM Oral Testimony MultiLabel Classifier")
 
 
 # Add all your application here
+#We added an empty home app to prevent the selector to automatically run the first page on the app
 app.add_app(" ",home.app)
 app.add_app("Search Corpus", search_corpus.app)
 app.add_app("Upload Corpus", upload_corpus.app)
