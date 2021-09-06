@@ -1,3 +1,5 @@
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/lmanuelfigueroa/ushmm_text_classification_app/main/app.py)
+
 # Overview
 
 This project was part of my undergrad internship with the Smithsonian Data Science Lab and United States Holocaust Memorial Museum. The goal of the project is to create a text classifier to categorize Holocaust documents to facilitate the searching for researchers  when looking for specific documents.
